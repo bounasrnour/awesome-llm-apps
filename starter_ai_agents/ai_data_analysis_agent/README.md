@@ -1,5 +1,8 @@
 # 📊 AI Data Analysis Agent
 
+### 🎓 FREE Step-by-Step Tutorial 
+**👉 [Click here to follow our complete step-by-step tutorial](https://www.theunwindai.com/p/build-an-ai-data-analysis-agent) and learn how to build this from scratch with detailed code walkthroughs, explanations, and best practices.**
+
 An AI data analysis Agent built using the Agno Agent framework and Openai's gpt-4o model. This agent helps users analyze their data - csv, excel files through natural language queries, powered by OpenAI's language models and DuckDB for efficient data processing - making data analysis accessible to users regardless of their SQL expertise.
 
 ## Features
@@ -31,7 +34,7 @@ An AI data analysis Agent built using the Agno Agent framework and Openai's gpt-
    ```bash
    # Clone the repository
    git clone https://github.com/Shubhamsaboo/awesome-llm-apps.git
-   cd ai_agent_tutorials/ai_data_analysis_agent
+   cd awesome-llm-apps/starter_ai_agents/ai_data_analysis_agent
 
    # Install dependencies
    pip install -r requirements.txt

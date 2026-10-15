@@ -3,12 +3,13 @@ import os
 import time
 import json
 import requests
-import PyPDF2
+import pypdf
 from datetime import datetime, timedelta
 import pytz
 
 import streamlit as st
 from agno.agent import Agent
+from agno.run.agent import RunOutput
 from agno.models.openai import OpenAIChat
 from agno.tools.email import EmailTools
 from phi.tools.zoom import ZoomTool
@@ -142,7 +143,7 @@ def create_email_agent() -> Agent:
             f"The name of the company is '{st.session_state.company_name}'"
         ],
         markdown=True,
-        show_tool_calls=True
+        debug_mode=True
     )
 
 
@@ -170,13 +171,13 @@ def create_scheduler_agent() -> Agent:
             "Handle scheduling errors gracefully"
         ],
         markdown=True,
-        show_tool_calls=True
+        debug_mode=True
     )
 
 
 def extract_text_from_pdf(pdf_file) -> str:
     try:
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        pdf_reader = pypdf.PdfReader(pdf_file)
         text = ""
         for page in pdf_reader.pages:
             text += page.extract_text()
@@ -192,7 +193,7 @@ def analyze_resume(
     analyzer: Agent
 ) -> Tuple[bool, str]:
     try:
-        response = analyzer.run(
+        response: RunOutput = analyzer.run(
             f"""Please analyze this resume against the following requirements and provide your response in valid JSON format:
             Role Requirements:
             {ROLE_REQUIREMENTS[role]}

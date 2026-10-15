@@ -11,14 +11,14 @@ from langchain_openai import ChatOpenAI
 import tempfile
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
-from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain import hub
 from langgraph.prebuilt import create_react_agent
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.language_models import BaseLanguageModel
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
@@ -134,7 +134,7 @@ def process_document(file) -> List[Document]:
         return []
 
 def create_routing_agent() -> Agent:
-    """Creates a routing agent using phidata framework"""
+    """Creates a routing agent using agno framework"""
     return Agent(
         model=OpenAIChat(
             id="gpt-4o",

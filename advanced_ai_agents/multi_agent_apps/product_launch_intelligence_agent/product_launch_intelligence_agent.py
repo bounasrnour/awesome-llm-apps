@@ -1,9 +1,10 @@
 import streamlit as st
 from agno.agent import Agent
+from agno.run.agent import RunOutput
+from agno.team import Team
 from agno.models.openai import OpenAIChat
 from agno.tools.firecrawl import FirecrawlTools
 from dotenv import load_dotenv
-from datetime import datetime
 from textwrap import dedent
 import os
 
@@ -40,7 +41,7 @@ if openai_key:
 if firecrawl_key:
     os.environ["FIRECRAWL_API_KEY"] = firecrawl_key
 
-# Initialize agents only if both keys are provided
+# Initialize team only if both keys are provided
 if openai_key and firecrawl_key:
     # Agent 1: Competitor Launch Analyst
     launch_analyst = Agent(
@@ -57,7 +58,7 @@ if openai_key and firecrawl_key:
         """),
         model=OpenAIChat(id="gpt-4o"),
         tools=[FirecrawlTools(search=True, crawl=True, poll_interval=10)],
-        show_tool_calls=True,
+        debug_mode=True,
         markdown=True,
         exponential_backoff=True,
         delay_between_retries=2,
@@ -79,7 +80,7 @@ if openai_key and firecrawl_key:
         """),
         model=OpenAIChat(id="gpt-4o"),
         tools=[FirecrawlTools(search=True, crawl=True, poll_interval=10)],
-        show_tool_calls=True,
+        debug_mode=True,
         markdown=True,
         exponential_backoff=True,
         delay_between_retries=2,
@@ -102,52 +103,37 @@ if openai_key and firecrawl_key:
         """),
         model=OpenAIChat(id="gpt-4o"),
         tools=[FirecrawlTools(search=True, crawl=True, poll_interval=10)],
-        show_tool_calls=True,
+        debug_mode=True,
         markdown=True,
         exponential_backoff=True,
         delay_between_retries=2,
     )
-else:
-    launch_analyst = None
-    sentiment_analyst = None
-    metrics_analyst = None
-    st.warning("⚠️ Please enter both API keys in the sidebar to use the application.")
 
-# ---------------- Helper to display response ----------------
-def display_agent_response(resp):
-    """Render different response structures nicely."""
-    if hasattr(resp, "content") and resp.content:
-        st.markdown(resp.content)
-    elif hasattr(resp, "messages"):
-        for m in resp.messages:
-            if m.role == "assistant" and m.content:
-                st.markdown(m.content)
-    else:
-        st.markdown(str(resp))
-
-# Helper to expand bullet summary into 1200-word general report
-def expand_insight(bullet_text: str, topic: str) -> str:
-    if not launch_analyst:
-        st.error("⚠️ Please enter both API keys in the sidebar first.")
-        return ""
-        
-    prompt = (
-        f"Using ONLY the bullet points below, craft an in-depth (~1200-word) launch analysis report on {topic}.\n"
-        f"Structure:\n"
-        f"1. Executive Summary (<120 words)\n"
-        f"2. Strengths & Opportunities (what worked well)\n"
-        f"3. Weaknesses & Gaps (what didn't work or could be improved)\n"
-        f"4. Actionable Recommendations (bullet list)\n"
-        f"5. Key Risks / Watch-outs\n\n"
-        f"Bullet Points:\n{bullet_text}\n\n"
-        f"Ensure analysis is objective, evidence-based and references the bullet insights. Keep paragraphs short (≤120 words)."
+    # Create the coordinated team
+    product_intelligence_team = Team(
+        name="Product Intelligence Team",
+        model=OpenAIChat(id="gpt-4o"),
+        members=[launch_analyst, sentiment_analyst, metrics_analyst],
+        instructions=[
+            "Coordinate the analysis based on the user's request type:",
+            "1. For competitor analysis: Use the Product Launch Analyst to evaluate positioning, strengths, weaknesses, and strategic insights",
+            "2. For market sentiment: Use the Market Sentiment Specialist to analyze social media sentiment, customer feedback, and brand perception",
+            "3. For launch metrics: Use the Launch Metrics Specialist to track KPIs, adoption rates, press coverage, and performance indicators",
+            "Always provide evidence-based insights with specific examples and data points",
+            "Structure responses with clear sections and actionable recommendations",
+            "Include sources section with all URLs crawled or searched"
+        ],
+        markdown=True,
+        debug_mode=True,
+        show_members_responses=True,
     )
-    long_resp = launch_analyst.run(prompt)
-    return long_resp.content if hasattr(long_resp, "content") else str(long_resp)
+else:
+    product_intelligence_team = None
+    st.warning("⚠️ Please enter both API keys in the sidebar to use the application.")
 
 # Helper to craft competitor-focused launch report for product managers
 def expand_competitor_report(bullet_text: str, competitor: str) -> str:
-    if not launch_analyst:
+    if not product_intelligence_team:
         st.error("⚠️ Please enter both API keys in the sidebar first.")
         return ""
 
@@ -169,12 +155,12 @@ def expand_competitor_report(bullet_text: str, competitor: str) -> str:
         f"• Populate the tables with specific points derived from the bullets.\n"
         f"• Only include rows that contain meaningful data; omit any blank entries."
     )
-    resp = launch_analyst.run(prompt)
+    resp: RunOutput = product_intelligence_team.run(prompt)
     return resp.content if hasattr(resp, "content") else str(resp)
 
 # Helper to craft market sentiment report
 def expand_sentiment_report(bullet_text: str, product: str) -> str:
-    if not sentiment_analyst:
+    if not product_intelligence_team:
         st.error("⚠️ Please enter both API keys in the sidebar first.")
         return ""
 
@@ -188,12 +174,12 @@ def expand_sentiment_report(bullet_text: str, product: str) -> str:
         f"Provide a short paragraph (≤120 words) summarising the overall sentiment balance and key drivers.\n\n"
         f"Tagged Bullets:\n{bullet_text}"
     )
-    resp = sentiment_analyst.run(prompt)
+    resp: RunOutput = product_intelligence_team.run(prompt)
     return resp.content if hasattr(resp, "content") else str(resp)
 
 # Helper to craft launch metrics report
 def expand_metrics_report(bullet_text: str, launch: str) -> str:
-    if not metrics_analyst:
+    if not product_intelligence_team:
         st.error("⚠️ Please enter both API keys in the sidebar first.")
         return ""
 
@@ -209,7 +195,7 @@ def expand_metrics_report(bullet_text: str, launch: str) -> str:
         f"Brief paragraph (≤120 words) highlighting what the metrics imply about launch success and next steps.\n\n"
         f"KPI Bullets:\n{bullet_text}"
     )
-    resp = metrics_analyst.run(prompt)
+    resp: RunOutput = product_intelligence_team.run(prompt)
     return resp.content if hasattr(resp, "content") else str(resp)
 
 # ---------------- UI ----------------
@@ -226,7 +212,7 @@ with st.container():
         company_name = st.text_input(
             label="Company Name",
             placeholder="Enter company name (e.g., OpenAI, Tesla, Spotify)",
-            help="This company will be analyzed by all three specialized agents",
+            help="This company will be analyzed by the coordinated team of specialized agents",
             label_visibility="collapsed"
         )
     with col2:
@@ -241,11 +227,6 @@ analysis_tabs = st.tabs([
     "💬 Market Sentiment", 
     "📈 Launch Metrics"
 ])
-
-# Persistent storage for latest response
-if "analysis_response" not in st.session_state:
-    st.session_state.analysis_response = None
-    st.session_state.analysis_meta = {}
 
 # Store separate responses for each agent
 if "competitor_response" not in st.session_state:
@@ -289,12 +270,12 @@ with analysis_tabs[0]:
                     st.info("⏳ Ready to analyze")
             
             if analyze_btn:
-                if not launch_analyst:
+                if not product_intelligence_team:
                     st.error("⚠️ Please enter both API keys in the sidebar first.")
                 else:
-                    with st.spinner("🔍 Launch Analyst gathering competitive intelligence..."):
+                    with st.spinner("🔍 Product Intelligence Team analyzing competitive strategy..."):
                         try:
-                            bullets = launch_analyst.run(
+                            bullets: RunOutput = product_intelligence_team.run(
                                 f"Generate up to 16 evidence-based insight bullets about {company_name}'s most recent product launches.\n"
                                 f"Format requirements:\n"
                                 f"• Start every bullet with exactly one tag: Positioning | Strength | Weakness | Learning\n"
@@ -353,12 +334,12 @@ with analysis_tabs[1]:
                     st.info("⏳ Ready to analyze")
             
             if sentiment_btn:
-                if not sentiment_analyst:
+                if not product_intelligence_team:
                     st.error("⚠️ Please enter both API keys in the sidebar first.")
                 else:
-                    with st.spinner("💬 Sentiment Specialist analyzing market perception..."):
+                    with st.spinner("💬 Product Intelligence Team analyzing market sentiment..."):
                         try:
-                            bullets = sentiment_analyst.run(
+                            bullets: RunOutput = product_intelligence_team.run(
                                 f"Summarize market sentiment for {company_name} in <=10 bullets. "
                                 f"Cover top positive & negative themes with source mentions (G2, Reddit, Twitter, customer reviews)."
                             )
@@ -415,12 +396,12 @@ with analysis_tabs[2]:
                     st.info("⏳ Ready to analyze")
             
             if metrics_btn:
-                if not metrics_analyst:
+                if not product_intelligence_team:
                     st.error("⚠️ Please enter both API keys in the sidebar first.")
                 else:
-                    with st.spinner("📈 Metrics Specialist analyzing launch performance..."):
+                    with st.spinner("📈 Product Intelligence Team analyzing launch metrics..."):
                         try:
-                            bullets = metrics_analyst.run(
+                            bullets: RunOutput = product_intelligence_team.run(
                                 f"List (max 10 bullets) the most important publicly available KPIs & qualitative signals for {company_name}'s recent product launches. "
                                 f"Include engagement stats, press coverage, adoption metrics, and market traction data if available."
                             )
@@ -448,7 +429,7 @@ with analysis_tabs[2]:
 with st.sidebar.container():
     st.markdown("### 🤖 System Status")
     if openai_key and firecrawl_key:
-        st.success("✅ All agents ready")
+        st.success("✅ Product Intelligence Team ready")
     else:
         st.error("❌ API keys required")
 
@@ -456,7 +437,7 @@ st.sidebar.divider()
 
 # Multi-agent system info
 with st.sidebar.container():
-    st.markdown("### 🎯 Specialized Agents")
+    st.markdown("### 🎯 Coordinated Team")
     
     agents_info = [
         ("🔍", "Product Launch Analyst", "Strategic GTM expert"),
@@ -500,5 +481,3 @@ with st.sidebar.container():
         **K** - Market sentiment  
         **L** - Launch metrics
         """)
-    else:
-        st.info("Enter a company name to enable quick actions")

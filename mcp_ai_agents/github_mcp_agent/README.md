@@ -1,6 +1,11 @@
 # 🐙 GitHub MCP Agent
 
+### 🎓 FREE Step-by-Step Tutorial 
+**👉 [Click here to follow our complete step-by-step tutorial](https://www.theunwindai.com/p/build-an-mcp-github-agent-in-less-than-50-lines-of-code) and learn how to build this from scratch with detailed code walkthroughs, explanations, and best practices.**
+
 A Streamlit application that allows you to explore and analyze GitHub repositories using natural language queries through the Model Context Protocol (MCP).
+
+**✨ Now using the official [GitHub MCP Server](https://github.com/github/github-mcp-server) from GitHub!**
 
 ## Features
 
@@ -15,11 +20,11 @@ A Streamlit application that allows you to explore and analyze GitHub repositori
 ### Requirements
 
 - Python 3.8+
-- Node.js and npm (for MCP GitHub server)
-  - This is a critical requirement! The app uses `npx` to run the MCP GitHub server
-  - Download and install from [nodejs.org](https://nodejs.org/)
-- GitHub Personal Access Token with appropriate permissions
+- Docker (for official GitHub MCP server)
+  - Download and install from [docker.com](https://www.docker.com/get-started)
+  - Make sure Docker is running before starting the app
 - OpenAI API Key
+- GitHub Personal Access Token
 
 ### Installation
 
@@ -34,35 +39,26 @@ A Streamlit application that allows you to explore and analyze GitHub repositori
    pip install -r requirements.txt
    ```
 
-3. Verify Node.js and npm are installed:
+3. Verify Docker is installed and running:
    ```bash
-   node --version
-   npm --version
-   npx --version
+   docker --version
+   docker ps
    ```
-   All of these commands should return version numbers. If they don't, please install Node.js.
 
-4. Set up your API keys:
-   - Set OpenAI API Key as an environment variable:
-     ```bash
-     export OPENAI_API_KEY=your-openai-api-key
-     ```
-   - GitHub token will be entered directly in the app interface
-
-5. Create a GitHub Personal Access Token:
-   - Visit https://github.com/settings/tokens
-   - Create a new token with `repo` and `user` scopes
-   - Save the token somewhere secure
+4. Get your API keys:
+   - **OpenAI API Key**: Get from [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+   - **GitHub Token**: Create at [github.com/settings/tokens](https://github.com/settings/tokens) with `repo` scope
 
 ### Running the App
 
 1. Start the Streamlit app:
    ```bash
-   streamlit run app.py
+   streamlit run github_agent.py
    ```
 
 2. In the app interface:
-   - Enter your GitHub token in the sidebar
+   - Enter your OpenAI API key
+   - Enter your GitHub token
    - Specify a repository to analyze
    - Select a query type or write your own
    - Click "Run Query"

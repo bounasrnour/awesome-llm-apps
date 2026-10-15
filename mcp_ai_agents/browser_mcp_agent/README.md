@@ -1,8 +1,8 @@
 # 🌐 Browser MCP Agent
 
-![Area](https://github.com/user-attachments/assets/285a6a02-c1a9-4581-b32b-b244f665f648)
+https://github.com/user-attachments/assets/a01e09fa-131b-479a-8df3-2d1a61fd80f3
 
-A Streamlit application that allows you to browse and interact with websites using natural language commands through the Model Context Protocol (MCP) and [MCP-Agent](https://github.com/lastmile-ai/mcp-agent) with Puppeteer integration.
+A Streamlit application that allows you to browse and interact with websites using natural language commands through the Model Context Protocol (MCP) and [MCP-Agent](https://github.com/lastmile-ai/mcp-agent) with Playwright integration.
 
 ## Features
 
@@ -18,8 +18,8 @@ A Streamlit application that allows you to browse and interact with websites usi
 ### Requirements
 
 - Python 3.8+
-- Node.js and npm (for Puppeteer)
-  - This is a critical requirement! The app uses Puppeteer to control a headless browser
+- Node.js and npm (for Playwright)
+  - This is a critical requirement! The app uses Playwright to control a headless browser
   - Download and install from [nodejs.org](https://nodejs.org/)
 - OpenAI or Anthropic API Key
 
@@ -43,12 +43,45 @@ A Streamlit application that allows you to browse and interact with websites usi
    ```
    Both commands should return version numbers. If they don't, please install Node.js.
 
-4. Set up your API keys:
-   - Set OpenAI API Key as an environment variable:
-     ```bash
-     export OPENAI_API_KEY=your-openai-api-key
-     ```
+4. Set up your API keys. Pick **one** of:
 
+   **a) Via environment variable (simplest for OpenAI):**
+   ```bash
+   export OPENAI_API_KEY=your-openai-api-key
+   ```
+
+   **b) Via `mcp_agent.secrets.yaml` (required for Ollama / any custom base URL):**
+   ```bash
+   cp mcp_agent.secrets.yaml.example mcp_agent.secrets.yaml
+   # edit mcp_agent.secrets.yaml and put your key under openai.api_key
+   ```
+
+### Running with a local Ollama model
+
+Because `mcp-agent` talks to an OpenAI-compatible endpoint and Ollama exposes one at `http://localhost:11434/v1`, this agent runs against a local model with just config changes — no code edits or extra dependencies. See discussion in [#329](https://github.com/Shubhamsaboo/awesome-llm-apps/issues/329).
+
+1. Install and start Ollama, then pull a tool-capable model:
+   ```bash
+   ollama pull llama3.2
+   ollama serve
+   ```
+
+2. Edit `mcp_agent.config.yaml` and replace the `openai:` block with:
+   ```yaml
+   openai:
+     base_url: "http://localhost:11434/v1"
+     default_model: "llama3.2"
+   ```
+
+3. In `mcp_agent.secrets.yaml`, set any non-empty `api_key` (Ollama ignores it):
+   ```yaml
+   openai:
+     api_key: "ollama"
+   ```
+
+4. Run as normal — `streamlit run main.py`. No `OPENAI_API_KEY` env var is required in this path.
+
+> Note: browser automation benefits from a reasoning-capable model. Smaller local models may struggle with multi-step Playwright tasks.
 
 ### Running the App
 
@@ -65,7 +98,7 @@ A Streamlit application that allows you to browse and interact with websites usi
 ### Example Commands
 
 #### Basic Navigation
-- "Go to www.lastmileai.dev"
+- "Go to www.mcp-agent.com"
 - "Go back to the previous page"
 
 #### Interaction
@@ -85,6 +118,6 @@ A Streamlit application that allows you to browse and interact with websites usi
 The application uses:
 - Streamlit for the user interface
 - MCP (Model Context Protocol) to connect the LLM with tools
-- Puppeteer for browser automation
+- Playwright for browser automation
 - [MCP-Agent](https://github.com/lastmile-ai/mcp-agent/) for the Agentic Framework
 - OpenAI's models to interpret commands and generate responses

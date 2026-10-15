@@ -13,12 +13,12 @@ https://github.com/user-attachments/assets/a0befa3a-f4c3-400d-9790-4b9e37254405
 - **CEO Agent**: Strategic leader and final decision maker
   - Analyzes startup ideas using structured evaluation
   - Makes strategic decisions across product, technical, marketing, and financial domains
-  - Uses AnalyzeStartupTool and MakeStrategicDecision tools
+  - Uses AnalyzeProjectRequirements tool
 
 - **CTO Agent**: Technical architecture and feasibility expert
   - Evaluates technical requirements and feasibility
   - Provides architecture decisions
-  - Uses QueryTechnicalRequirements and EvaluateTechnicalFeasibility tools
+  - Uses CreateTechnicalSpecification tool
 
 - **Product Manager Agent**: Product strategy specialist
   - Defines product strategy and roadmap
@@ -41,18 +41,18 @@ The agency uses specialized tools built with OpenAI Schema for structured analys
 - **Analysis Tools**: AnalyzeProjectRequirements for market evaluation and analysis of startup idea
 - **Technical Tools**: CreateTechnicalSpecification for technical assessment
 
-### 🔄 Asynchronous Communication
+### 🤝 Multi-Agent Collaboration
 
-The agency operates in async mode, enabling:
-- Parallel processing of analyses from different agents
-- Efficient multi-agent collaboration
-- Real-time communication between agents
-- Non-blocking operations for better performance
+The agency coordinates five specialists through explicit communication flows:
+- CEO drives strategic oversight across the team
+- CTO and Developer collaborate on implementation feasibility
+- Product and Client Success coordinate roadmap and go-to-market planning
+- Each analysis is returned in a dedicated section in the Streamlit UI
 
 ### 🔗 Agent Communication Flows
 - CEO ↔️ All Agents (Strategic Oversight)
 - CTO ↔️ Developer (Technical Implementation)
-- Product Manager ↔️ Marketing Manager (Go-to-Market Strategy)
+- Product Manager ↔️ Client Success Manager (Go-to-Market Strategy)
 - Product Manager ↔️ Developer (Feature Implementation)
 - (and more!)
 
@@ -74,7 +74,7 @@ Before anything else, Please get your OpenAI API Key here: https://platform.open
 
 3. **Run the Streamlit app**:
     ```bash
-    streamlit run ai_services_agency/agency.py
+    streamlit run agency.py
     ```
 
 4. **Enter your OpenAI API Key** in the sidebar when prompted and start analyzing your startup idea!

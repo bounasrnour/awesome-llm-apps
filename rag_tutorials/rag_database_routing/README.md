@@ -1,12 +1,15 @@
 # 📠 RAG Agent with Database Routing
 
+### 🎓 FREE Step-by-Step Tutorial 
+**👉 [Click here to follow our complete step-by-step tutorial](https://www.theunwindai.com/p/build-a-rag-agent-with-database-routing) and learn how to build this from scratch with detailed code walkthroughs, explanations, and best practices.**
+
 A Streamlit application that demonstrates an advanced implementation of RAG Agent with intelligent query routing. The system combines multiple specialized databases with smart fallback mechanisms to ensure reliable and accurate responses to user queries.
 
 ## Features
 
 - **Document Upload**: Users can upload multiple PDF documents related to a particular company. These documents are processed and stored in one of the three databases: Product Information, Customer Support & FAQ, or Financial Information.
   
-- **Natural Language Querying**: Users can ask questions in natural language. The system automatically routes the query to the most relevant database using a phidata agent as the router.
+- **Natural Language Querying**: Users can ask questions in natural language. The system automatically routes the query to the most relevant database using a agno agent as the router.
 
 - **RAG Orchestration**: Utilizes Langchain for orchestrating the retrieval augmented generation process, ensuring that the most relevant information is retrieved and presented to the user.
 
@@ -47,7 +50,7 @@ A Streamlit application that demonstrates an advanced implementation of RAG Agen
 ## Technologies Used
 
 - **Langchain**: For RAG orchestration, ensuring efficient retrieval and generation of information.
-- **Phidata Agent**: Used as the router agent to determine the most relevant database for a given query.
+- **Agno Agent**: Used as the router agent to determine the most relevant database for a given query.
 - **LangGraph Agent**: Acts as a fallback mechanism, utilizing DuckDuckGo for web research when necessary.
 - **Streamlit**: Provides a user-friendly interface for document upload and querying.
 - **Qdrant**: Used for managing the databases, storing and retrieving document embeddings efficiently.

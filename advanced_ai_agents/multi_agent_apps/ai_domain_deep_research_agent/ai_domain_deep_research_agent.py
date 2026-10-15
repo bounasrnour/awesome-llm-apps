@@ -3,6 +3,7 @@ import asyncio
 import streamlit as st
 from dotenv import load_dotenv
 from agno.agent import Agent
+from agno.run.agent import RunOutput
 from composio_agno import ComposioToolSet, Action
 from agno.models.together import Together
 
@@ -102,7 +103,7 @@ def generate_questions(llm, composio_tools, topic, domain):
     question_generator = create_agents(llm, composio_tools)
     
     with st.spinner("🤖 Generating research questions..."):
-        questions_task = question_generator.run(
+        questions_task: RunOutput = question_generator.run(
             f"Generate exactly 5 specific yes/no research questions about the topic '{topic}' in the domain '{domain}'."
         )
         questions_text = questions_task.content
@@ -121,7 +122,7 @@ def research_question(llm, composio_tools, topic, domain, question):
         instructions=f"You are a sophisticated research assistant. Answer the following research question about the topic '{topic}' in the domain '{domain}':\n\n{question}\n\nUse the PERPLEXITYAI_PERPLEXITY_AI_SEARCH and COMPOSIO_SEARCH_TAVILY_SEARCH tools to provide a concise, well-sourced answer."
     )
     
-    research_result = research_task.run()
+    research_result: RunOutput = research_task.run()
     return research_result.content
 
 # Function to compile final report
@@ -155,7 +156,7 @@ def compile_report(llm, composio_tools, topic, domain, question_answers):
             """
         )
         
-        compile_result = compile_report_task.run()
+        compile_result: RunOutput = compile_report_task.run()
         st.session_state.report_content = compile_result.content
         st.session_state.research_complete = True
         return compile_result.content
@@ -214,18 +215,22 @@ if together_api_key and composio_api_key:
         
         # Store the answers
         st.session_state.question_answers = question_answers
-        
-        # Compile report button
-        if st.button("Compile Final Report", key="compile_report"):
-            report_content = compile_report(llm, composio_tools, topic, domain, question_answers)
-            
-            # Display the report content
-            st.header("Final Report")
-            st.success("Your report has been compiled and a Google Doc has been created.")
-            
-            # Show the full report content
-            with st.expander("View Full Report Content", expanded=True):
-                st.markdown(report_content)
+
+    # Compile report button — must live OUTSIDE the "Start Research" block. Clicking
+    # it reruns the script, at which point "Start Research" is False and a nested
+    # button would never be rendered (so it could never fire).
+    if st.session_state.question_answers and st.button("Compile Final Report", key="compile_report"):
+        report_content = compile_report(
+            llm, composio_tools, topic, domain, st.session_state.question_answers
+        )
+
+        # Display the report content
+        st.header("Final Report")
+        st.success("Your report has been compiled and a Google Doc has been created.")
+
+        # Show the full report content
+        with st.expander("View Full Report Content", expanded=True):
+            st.markdown(report_content)
     
     # Display previous results if available
     if len(st.session_state.question_answers) > 0 and not st.session_state.research_complete:
